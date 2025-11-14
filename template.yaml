@@ -21,7 +21,7 @@ Resources:
     Properties:
       CorsConfiguration:
         AllowOrigins:
-          - https://cv.tiagodeane.com
+          - https://tiagodeane.com
         AllowMethods:
           - GET
           - POST
