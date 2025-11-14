@@ -1,6 +1,8 @@
-# Cloud Resume backend
+# Personal website backend
 
-This project contains source code and supporting files for a serverless backend for the Cloud Resume Challenge, that can be deployed with the AWS Serverless Application Model (AWS SAM) command line interface (CLI). It includes the following files and folders:
+This project contains the source code and supporting files for my personal website's serverless backend, that can be deployed with the AWS Serverless Application Model (AWS SAM) command line interface (CLI). Initially I made this for the Cloud Resume Challenge, but since I like its functionality I decided to keep using it for my main homepage. This backend tracks the number of visitors to the website, per country.
+
+This project includes the following files and folders:
 
 - `src` - Code for the application's Lambda function.
 - `events` - Invocation events that you can use to invoke the function.
@@ -9,7 +11,7 @@ This project contains source code and supporting files for a serverless backend 
 
 The application uses several AWS resources, including Lambda functions, an API Gateway and a DynamoDB table. SAM leverages CloudFormation for automatic deployment of AWS services. These resources are defined in the `template.yaml` file in this project.
 
-The website's frontend source code is [here](https://github.com/TiDeane/Cloud-Resume-frontend).
+The website's frontend source code is [here](https://github.com/TiDeane/Personal-website-frontend).
 
 ## Deploying the application
 
