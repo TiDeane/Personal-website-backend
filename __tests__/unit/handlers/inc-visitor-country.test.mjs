@@ -121,7 +121,27 @@ describe('Test incCountryHandler', function () {
             body: JSON.stringify(returnedItem) 
         }; 
  
-        expect(result).toEqual(expectedResult); 
+        expect(result).toEqual(expectedResult);
     });
-}); 
+
+    // invokes incCountryHandler() with a method other than POST
+    it('returns 405 and doesn\'t update table when the method isn\'t POST', async () => {
+        const event = {
+            requestContext: {
+                http: {
+                    method: 'GET'
+                }
+            },
+            headers: {
+                'cloudfront-viewer-country': 'PT',
+                'cloudfront-viewer-country-name': 'Portugal'
+            }
+        };
+
+        const result = await incCountryHandler(event);
+
+        expect(result.statusCode).toEqual(405);
+        expect(ddbMock.commandCalls(UpdateCommand).length).toEqual(0);
+    });
+});
  

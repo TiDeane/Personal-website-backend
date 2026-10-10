@@ -2,9 +2,9 @@
   "requestContext": {
     "http": {
       "method": "POST"
-    },
-    "headers": {
-      "cloudfront-viewer-country-name": "Portugal"
     }
+  },
+  "headers": {
+    "cloudfront-viewer-country-name": "Portugal"
   }
 }

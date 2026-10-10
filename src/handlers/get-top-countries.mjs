@@ -12,7 +12,13 @@ const tableName = process.env.VISITOR_COUNTRY_TABLE;
  */
 export const getTopCountriesHandler = async (event) => {
   if (event.requestContext.http.method !== 'GET') {
-    throw new Error(`getTopCountriesHandler only accept GET method, you tried: ${event.requestContext.http.method}`);
+    const response = {
+      statusCode: 405,
+      headers: { 'Content-Type': 'application/json', 'Allow': 'GET' },
+      body: JSON.stringify({ error: `getTopCountriesHandler only accepts GET method, you tried: ${event.requestContext.http.method}` })
+    };
+
+    return response;
   }
 
   var params = {
@@ -43,7 +49,7 @@ export const getTopCountriesHandler = async (event) => {
 
     return response;
   } catch (err) {
-    console.log("Error", err);
+    console.error("Error", err);
 
     const response = {
       statusCode: 500,

@@ -12,12 +12,19 @@ const tableName = process.env.VISITOR_COUNTRY_TABLE;
  */
 export const incCountryHandler = async (event) => {
   if (event.requestContext.http.method !== 'POST') {
-    throw new Error(`incCountryHandler only accepts POST method, you tried: ${event.requestContext.http.method} method.`);
+    const response = {
+      statusCode: 405,
+      headers: { 'Content-Type': 'application/json', 'Allow': 'POST' },
+      body: JSON.stringify({ error: `incCountryHandler only accepts POST method, you tried: ${event.requestContext.http.method}` })
+    };
+
+    return response;
   }
 
+  // HTTP API (payload format 2.0) always lowercases header names
   const headers = event.headers || {};
-  const countryCode = headers["cloudfront-viewer-country"] || headers["CloudFront-Viewer-Country"] || 'Unknown';
-  const countryName = headers["cloudfront-viewer-country-name"] || headers["CloudFront-Viewer-Country-Name"] || 'Unknown';
+  const countryCode = headers["cloudfront-viewer-country"] || 'Unknown';
+  const countryName = headers["cloudfront-viewer-country-name"] || 'Unknown';
 
   console.log("Resolved countryCode:", countryCode);
   console.log("Resolved countryName:", countryName);

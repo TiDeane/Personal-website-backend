@@ -72,6 +72,13 @@ describe('Test getTopCountriesHandler', () => {
         expect(ddbMock.commandCalls(ScanCommand).length).toEqual(2);
     });
 
+    it('should return 405 when the method isn\'t GET', async () => {
+        const result = await getTopCountriesHandler({ requestContext: { http: { method: 'POST' } } });
+
+        expect(result.statusCode).toEqual(405);
+        expect(ddbMock.commandCalls(ScanCommand).length).toEqual(0);
+    });
+
     it('should return 500 when the scan fails', async () => {
         ddbMock.on(ScanCommand).rejects(new Error('scan failed'));
 
