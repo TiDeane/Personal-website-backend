@@ -1,11 +1,18 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { ddbDocClient, tableName } from "../dynamodb.mjs";
 
-const client = new DynamoDBClient({ region: "eu-west-1" });
-const ddbDocClient = DynamoDBDocumentClient.from(client);
+// The top countries are kept in memory while the Lambda instance is warm, to avoid scanning on every request
+const CACHE_TTL_MS = 60 * 1000;
+var cachedTopCountries = null;
+var cacheExpiresAt = 0;
 
-// Get the DynamoDB table name from environment variables
-const tableName = process.env.VISITOR_COUNTRY_TABLE;
+/**
+ * Empties the in-memory cache, so the next request scans the table again
+ */
+export const clearCache = () => {
+  cachedTopCountries = null;
+  cacheExpiresAt = 0;
+};
 
 /**
  * Receives an HTTP GET request and returns the top 3 countries by visits to the website
@@ -26,17 +33,20 @@ export const getTopCountriesHandler = async (event) => {
   };
 
   try {
-    var items = [];
-    do {
-      const data = await ddbDocClient.send(new ScanCommand(params));
-      items = items.concat(data.Items || []);
-      params.ExclusiveStartKey = data.LastEvaluatedKey;
-    } while (params.ExclusiveStartKey);
+    if (!cachedTopCountries || Date.now() >= cacheExpiresAt) {
+      var items = [];
+      do {
+        const data = await ddbDocClient.send(new ScanCommand(params));
+        items = items.concat(data.Items || []);
+        params.ExclusiveStartKey = data.LastEvaluatedKey;
+      } while (params.ExclusiveStartKey);
 
-    var topCountries = items
-      .filter(item => item.countryName !== 'Unknown') // can remove when database is more full
-      .sort((a, b) => (b.count || 0) - (a.count || 0))
-      .slice(0, 3); // Top 3
+      cachedTopCountries = items
+        .filter(item => item.countryName !== 'Unknown') // can remove when database is more full
+        .sort((a, b) => (b.count || 0) - (a.count || 0))
+        .slice(0, 3); // Top 3
+      cacheExpiresAt = Date.now() + CACHE_TTL_MS;
+    }
 
     const response =  {
       statusCode: 200,
@@ -44,7 +54,7 @@ export const getTopCountriesHandler = async (event) => {
         'Content-Type': 'application/json',
         'Cache-Control': 'max-age=300'
       },
-      body: JSON.stringify({ topCountries })
+      body: JSON.stringify({ topCountries: cachedTopCountries })
     };
 
     return response;

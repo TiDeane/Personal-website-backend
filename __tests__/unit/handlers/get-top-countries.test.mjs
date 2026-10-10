@@ -1,5 +1,5 @@
 // Import getTopCountriesHandler function from get-top-countries.mjs
-import { getTopCountriesHandler } from '../../../src/handlers/get-top-countries.mjs';
+import { getTopCountriesHandler, clearCache } from '../../../src/handlers/get-top-countries.mjs';
 
 import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from "aws-sdk-client-mock";
@@ -18,6 +18,7 @@ describe('Test getTopCountriesHandler', () => {
 
     beforeEach(() => {
         ddbMock.reset();
+        clearCache();
       });
 
     it('should return 3 countries', async () => {
@@ -70,6 +71,18 @@ describe('Test getTopCountriesHandler', () => {
         expect(result.statusCode).toEqual(200);
         expect(JSON.parse(result.body).topCountries.map(item => item.countryCode)).toEqual(['PT', 'DE', 'BR']);
         expect(ddbMock.commandCalls(ScanCommand).length).toEqual(2);
+    });
+
+    it('should only scan once while the cache is fresh', async () => {
+        ddbMock.on(ScanCommand).resolves({
+            Items: [{ countryCode: 'PT', countryName: 'Portugal', count: 10 }]
+        });
+
+        const first = await getTopCountriesHandler(event);
+        const second = await getTopCountriesHandler(event);
+
+        expect(second).toEqual(first);
+        expect(ddbMock.commandCalls(ScanCommand).length).toEqual(1);
     });
 
     it('should return 405 when the method isn\'t GET', async () => {

@@ -1,11 +1,5 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-
-const client = new DynamoDBClient({ region: "eu-west-1" });
-const ddbDocClient = DynamoDBDocumentClient.from(client);
-
-// Get the DynamoDB table name from environment variables
-const tableName = process.env.VISITOR_COUNTRY_TABLE;
+import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { ddbDocClient, tableName } from "../dynamodb.mjs";
 
 /**
  * Receives an HTTP POST request and increments the visitor's country on DynamoDB
@@ -61,8 +55,7 @@ export const incCountryHandler = async (event) => {
   }
 
   try {
-    const data = await ddbDocClient.send(new UpdateCommand(params));
-    console.log("Success - item added or updated", data);
+    await ddbDocClient.send(new UpdateCommand(params));
 
     const response = {
       statusCode: 200,
