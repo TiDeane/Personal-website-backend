@@ -32,6 +32,6 @@ Tests (`__tests__/unit/handlers/`) mock `DynamoDBDocumentClient` with `aws-sdk-c
 
 ## CI/CD
 
-`.github/workflows/deploy-backend.yml` runs on every push to `main`: `npm ci` → `npm test` → `sam build` → `sam deploy --no-confirm-changeset`. Pushing to `main` therefore deploys to production. `buildspec.yml` is a leftover CodeBuild config, not used by the GitHub workflow.
+`.github/workflows/deploy-backend.yml` has two jobs. `test` (`npm ci` → `npm test`) runs on every push to any branch. `deploy` (`sam build` → `sam deploy --no-confirm-changeset`) runs only on `main`, after `test` passes. Pushing to `main` therefore deploys to production. `buildspec.yml` is a leftover CodeBuild config, not used by the GitHub workflow.
 
 `config.sh` (untracked) holds local AWS credentials/IDs — never commit it.

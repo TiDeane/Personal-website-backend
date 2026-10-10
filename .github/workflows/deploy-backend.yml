@@ -3,10 +3,10 @@ name: Test and Deploy SAM Backend
 on:
   push:
     branches:
-      - main
+      - '**'
 
 jobs:
-  test-and-deploy:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +23,21 @@ jobs:
 
       - name: Run tests
         run: npm run test
+
+  # Only deploys from the main branch, and only if the tests pass
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
