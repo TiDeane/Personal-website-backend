@@ -42,8 +42,8 @@ Resources:
       Timeout: 10
       Description: HTTP GET method to get the top 3 countries by visits to the website
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the CloudResumeVisitorCountry table
-        - DynamoDBCrudPolicy:
+        # Give Read Permissions to the CloudResumeVisitorCountry table
+        - DynamoDBReadPolicy:
             TableName: !Ref CloudResumeVisitorCountry
       Environment:
         Variables:
@@ -69,8 +69,8 @@ Resources:
       Timeout: 10
       Description: HTTP post method to increase the visitor's country's count on DynamoDB
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the VISITOR_COUNTRY_TABLE
-        - DynamoDBCrudPolicy:
+        # Give Write Permissions to the VISITOR_COUNTRY_TABLE
+        - DynamoDBWritePolicy:
             TableName: !Ref CloudResumeVisitorCountry
       Environment:
         Variables:
