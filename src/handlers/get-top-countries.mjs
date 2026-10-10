@@ -20,15 +20,24 @@ export const getTopCountriesHandler = async (event) => {
   };
 
   try {
-    const data = await ddbDocClient.send(new ScanCommand(params));
+    var items = [];
+    do {
+      const data = await ddbDocClient.send(new ScanCommand(params));
+      items = items.concat(data.Items || []);
+      params.ExclusiveStartKey = data.LastEvaluatedKey;
+    } while (params.ExclusiveStartKey);
 
-    var topCountries = data.Items
+    var topCountries = items
       .filter(item => item.countryName !== 'Unknown') // can remove when database is more full
       .sort((a, b) => (b.count || 0) - (a.count || 0))
       .slice(0, 3); // Top 3
 
     const response =  {
       statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'max-age=300'
+      },
       body: JSON.stringify({ topCountries })
     };
 
@@ -38,6 +47,7 @@ export const getTopCountriesHandler = async (event) => {
 
     const response = {
       statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ error: 'Failed to fetch data' })
     };
 

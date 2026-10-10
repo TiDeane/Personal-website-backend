@@ -36,6 +36,7 @@ describe('Test incCountryHandler', function () {
         
         const expectedResult = { 
             statusCode: 200, 
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(returnedItem) 
         }; 
  
@@ -64,11 +65,33 @@ describe('Test incCountryHandler', function () {
         const result = await incCountryHandler(event); 
         
         const expectedResult = { 
-            statusCode: 500, 
+            statusCode: 400, 
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(returnedItem) 
         }; 
  
         expect(result).toEqual(expectedResult); 
+        expect(ddbMock.commandCalls(UpdateCommand).length).toEqual(0); 
+    });
+
+    // invokes incCountryHandler() with a country-code header that isn't a two-letter code
+    it('doesn\'t update table when country-code header is invalid', async () => { 
+        const event = { 
+            requestContext: {
+                http: {
+                    method: 'POST'
+                }
+            },
+            headers: {
+                'cloudfront-viewer-country': 'portugal',
+                'cloudfront-viewer-country-name': 'Portugal'
+            }
+        }; 
+     
+        const result = await incCountryHandler(event); 
+ 
+        expect(result.statusCode).toEqual(400); 
+        expect(ddbMock.commandCalls(UpdateCommand).length).toEqual(0); 
     });
 
     // invokes incCountryHandler() with missing country-name header
@@ -94,6 +117,7 @@ describe('Test incCountryHandler', function () {
         
         const expectedResult = { 
             statusCode: 200, 
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(returnedItem) 
         }; 
  

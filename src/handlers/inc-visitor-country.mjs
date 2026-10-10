@@ -19,7 +19,6 @@ export const incCountryHandler = async (event) => {
   const countryCode = headers["cloudfront-viewer-country"] || headers["CloudFront-Viewer-Country"] || 'Unknown';
   const countryName = headers["cloudfront-viewer-country-name"] || headers["CloudFront-Viewer-Country-Name"] || 'Unknown';
 
-  console.log("Received headers:", headers);
   console.log("Resolved countryCode:", countryCode);
   console.log("Resolved countryName:", countryName);
 
@@ -33,12 +32,13 @@ export const incCountryHandler = async (event) => {
     },
   };
 
-  if (countryCode === "Unknown") {
-    // Abort and don't update table if countryCode is unknown
+  if (!/^[A-Z]{2}$/.test(countryCode)) {
+    // Abort and don't update table if countryCode is unknown or isn't a two-letter code
     console.log("Unknown country code - aborting operation");
 
     const response = {
-      statusCode: 500,
+      statusCode: 400,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ error: 'Failed to update count, unknown country code' })
     };
 
@@ -59,6 +59,7 @@ export const incCountryHandler = async (event) => {
 
     const response = {
       statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: `Updated country: ${countryCode}` })
     };
 
@@ -68,6 +69,7 @@ export const incCountryHandler = async (event) => {
 
     const response = {
       statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ error: 'Failed to update count' })
     };
 
