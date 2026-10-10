@@ -39,7 +39,7 @@ describe('Test getTopCountriesHandler', () => {
             statusCode: 200,
             headers: {
                 'Content-Type': 'application/json',
-                'Cache-Control': 'max-age=300'
+                'Cache-Control': 'max-age=60'
             },
             body: JSON.stringify({ topCountries: items })
         };

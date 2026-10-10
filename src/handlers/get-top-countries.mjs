@@ -1,8 +1,8 @@
 import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient, tableName } from "../dynamodb.mjs";
 
-// The top countries are kept in memory while the Lambda instance is warm, to avoid scanning on every request
-const CACHE_TTL_MS = 60 * 1000;
+// Lambda cache: keep the top countries in memory for 30 seconds, to avoid scanning the table on every request
+const CACHE_TTL_MS = 30 * 1000;
 var cachedTopCountries = null;
 var cacheExpiresAt = 0;
 
@@ -52,7 +52,8 @@ export const getTopCountriesHandler = async (event) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'max-age=300'
+        // Browser cache: let the browser reuse this response for 60 seconds, to avoid calling the API on every page load
+        'Cache-Control': 'max-age=60'
       },
       body: JSON.stringify({ topCountries: cachedTopCountries })
     };
