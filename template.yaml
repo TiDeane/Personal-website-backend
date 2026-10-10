@@ -25,6 +25,10 @@ Resources:
         AllowMethods:
           - GET
           - POST
+      # Limit requests across all routes and callers, so the counts can't be inflated quickly
+      DefaultRouteSettings:
+        ThrottlingRateLimit: 5
+        ThrottlingBurstLimit: 10
 
   # This is a Lambda function config associated with the source code: get-top-countries.js
   getTopCountriesFunction:
